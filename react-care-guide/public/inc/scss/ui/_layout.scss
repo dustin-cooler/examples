@@ -1,0 +1,59 @@
+//------------------------------------//
+//  $LAYOUT
+//------------------------------------//
+
+body { min-width: $site-min-width; }
+
+.site-wrapper {
+  max-width: $site-wrapper-max-width;
+  margin-left: auto;
+  margin-right: auto;
+  @include padding-horizontal($gutter);
+  @include padding-vertical($gutter);
+}
+
+.App {
+  max-width: 400px;
+  min-height: 400px;
+  margin: auto;
+  background: url('/inc/images/elephant-970456_640.jpg') center center no-repeat;
+  position: relative;
+
+  &::before {
+    background-color: rgba(0,0,0,0.4);
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    content: ' ';
+
+    -webkit-transition: visibility 0.6s, background .5s ease-out;
+    -moz-transition: visibility 0.6s, background .5s ease-out;
+    -o-transition: visibility 0.6s, background .5s ease-out;
+    transition: visibility 0.6s, background .5s ease-out;
+  }
+
+  &.canvas::before {
+    background-color: rgba(0,0,0,0);
+    visibility: hidden;
+  }
+
+  .new-game, .end-game {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    text-align: center;
+    h2, h3 {
+      color: $white;
+    }
+    button.btn {
+      display: block;
+      margin: 0.75rem auto;
+      background-color: $secondary;
+      border-color: $white;
+      color: $white;
+    }
+  }
+}
