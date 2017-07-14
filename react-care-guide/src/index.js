@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
-import registerServiceWorker from './registerServiceWorker';
-import './index.css';
+import { Provider } from 'react-redux';
+import ConnectApp from './components/App';
+import store from './store';
 
-ReactDOM.render(<App />, document.getElementById('root'));
-registerServiceWorker();
+// render the App component wrapped with a Provider component to give it access to the redux store
+ReactDOM.render(<Provider store={store}><ConnectApp /></Provider>, document.getElementById('root'));

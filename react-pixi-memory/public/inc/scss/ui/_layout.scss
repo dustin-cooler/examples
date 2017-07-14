@@ -12,6 +12,20 @@ body { min-width: $site-min-width; }
   @include padding-vertical($gutter);
 }
 
+.legal {
+  max-width: 400px;
+  margin: 0 auto;
+  padding-top: 0.25rem;
+  a {
+    color: #000;
+    text-decoration: none;
+    img {
+      width: 90px;
+      padding-left: 0.1rem;
+    }
+  }
+}
+
 .App {
   max-width: 400px;
   min-height: 400px;

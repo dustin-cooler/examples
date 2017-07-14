@@ -1,8 +1,9 @@
-import { Component } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as actionCreators from '../actions';
+import Sprite from './Sprite';
 
 const PIXI = window.PIXI;
 
@@ -25,68 +26,36 @@ class Card extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      animating: false,
-      animation: 'none',
-      start: 0,
-      lastframe: 0,
-      direction: -1
-    }
-
-
-    this.onClick = this.onClick.bind(this);
-    this.delta = this.delta.bind(this);
-    this.flip = this.flip.bind(this);
-    this.flipEnd = this.flipEnd.bind(this);
-    this.fade = this.fade.bind(this);
-    this.fadeEnd = this.fadeEnd.bind(this);
-
-    this.duration = 250;
-
-    this.defaultMaskDimensions = {
-      x: this.props.x - 40,
-      y: this.props.y - 40,
-      w: 80,
-      h: 80
-    }
-  }
-
-  componentDidMount() {
     this.textures = {
       cardBackground: PIXI.Texture.fromImage(this.props.cardBackground),
       cardImage: PIXI.Texture.fromImage(this.props.imageUrl)
     }
 
-    this.mask = new PIXI.Graphics();
-    this.mask.isMask = true;
-    this.mask.drawRect(this.props.x - 40, this.props.y - 40, 80, 80);
-    this.mask.dimensions = Object.assign({}, this.defaultMaskDimensions);
+    this.state = {
+      animating: false,
+      animation: 'none',
+      start: 0,
+      lastframe: 0,
+      direction: -1,
+      width: 80,
+      height: 80,
+      scaleX: 0.35,
+      scaleY: 0.35,
+      texture: this.textures.cardBackground,
+      alpha: 1
+    }
 
-    this.sprite = new PIXI.Sprite(this.textures.cardBackground);
-    this.sprite.hitArea = new PIXI.Rectangle(-114, -114, 228, 228);
-    this.sprite.anchor.x = 0.5;
-    this.sprite.anchor.y = 0.5;
-    this.sprite.scale.x = 0.35;
-    this.sprite.scale.y = 0.35;
-    this.sprite.position.x = this.props.x;
-    this.sprite.position.y = this.props.y;
-    this.sprite.mask = this.mask;
-    this.sprite.interactive = this.props.Interactive;
-    this.sprite.buttonMode = this.props.Interactive;
-    this.sprite.on('mousedown', this.onClick);
-    this.sprite.on('touchstart', this.onClick);
-    this.props.addToStage(this.sprite);
-  }
+    this.delta = this.delta.bind(this);
+    this.flip = this.flip.bind(this);
+    this.flipEnd = this.flipEnd.bind(this);
+    this.fade = this.fade.bind(this);
+    this.fadeEnd = this.fadeEnd.bind(this);
+    this.onClick = this.onClick.bind(this);
 
-  componentWillUnmount() {
-    this.props.removeFromStage(this.sprite);
+    this.duration = 250;
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.Interactive !== this.props.Interactive && !this.state.animating) {
-      this.sprite.buttonMode = (!nextProps.flipped && nextProps.Interactive);
-      this.sprite.interactive = (!nextProps.flipped && nextProps.Interactive);
-    }
     if (nextProps.flipped !== this.props.flipped) {
       this.setState({
         animating: true,
@@ -121,22 +90,19 @@ class Card extends Component {
 
     if (this.state.lastframe === 0) {
       if (this.state.direction > 0) {
-        this.sprite.texture = (this.props.flipped) ? this.textures.cardImage : this.textures.cardBackground;
-        this.sprite.scale.x = (this.props.flipped) ? 1 : 0.35;
-        this.sprite.scale.y = (this.props.flipped) ? 1 : 0.35;
+        const texture = (this.props.flipped) ? this.textures.cardImage : this.textures.cardBackground;
+        const scaleX = (this.props.flipped) ? 1 : 0.35;
+        const scaleY = (this.props.flipped) ? 1 : 0.35;
+        this.setState({texture, scaleX, scaleY});
       }
-      this.sprite.buttonMode = false;
-      this.sprite.interactive = false;
     } else {
+      let width = this.state.width;
       if (this.state.direction < 0) {
-        this.mask.dimensions.w -= (80 * (delta.thisframe / this.duration));
-        this.mask.dimensions.x += (40 * (delta.thisframe / this.duration));
+        width -= (80 * (delta.thisframe / this.duration));
       } else {
-        this.mask.dimensions.w += (80 * (delta.thisframe / this.duration));
-        this.mask.dimensions.x -= (40 * (delta.thisframe / this.duration));
+        width += (80 * (delta.thisframe / this.duration));
       }
-      this.mask.clear();
-      this.mask.drawRect(this.mask.dimensions.x, this.mask.dimensions.y, this.mask.dimensions.w, this.mask.dimensions.h);
+      this.setState({width});
     }
     this.setState({lastframe: Date.now()});
   }
@@ -151,20 +117,20 @@ class Card extends Component {
         animation: 'flip'
       });
     } else {
-      this.sprite.scale.x = (this.props.flipped) ? 1 : 0.35;
-      this.sprite.scale.y = (this.props.flipped) ? 1 : 0.35;
-      this.sprite.texture = (this.props.flipped) ? this.textures.cardImage : this.textures.cardBackground;
-      this.mask.dimensions = Object.assign({}, this.defaultMaskDimensions);
-      this.mask.clear();
-      this.mask.drawRect(this.mask.dimensions.x, this.mask.dimensions.y, this.mask.dimensions.w, this.mask.dimensions.h);
-      this.sprite.buttonMode = (!this.props.flipped && this.props.Interactive);
-      this.sprite.interactive = (!this.props.flipped && this.props.Interactive);
+      const scaleX = (this.props.flipped) ? 1 : 0.35;
+      const scaleY = (this.props.flipped) ? 1 : 0.35;
+      const texture = (this.props.flipped) ? this.textures.cardImage : this.textures.cardBackground;
+      const width = 80;
       this.setState({
         animating: false,
         start: 0,
         lastframe: 0,
         direction: -1,
-        animation: 'none'
+        animation: 'none',
+        scaleX,
+        scaleY,
+        texture,
+        width
       });
     }
   }
@@ -176,23 +142,23 @@ class Card extends Component {
       return;
     }
 
+    let alpha = this.state.alpha
     if (this.state.lastframe > 0) {
       if (this.state.direction < 0) {
-        this.sprite.alpha -= (1 * (delta.thisframe / this.duration));
-        this.mask.dimensions.x += (40 * (delta.thisframe / this.duration));
+        alpha -= (1 * (delta.thisframe / this.duration));
       } else {
-        this.sprite.alpha += (1 * (delta.thisframe / this.duration));
+        alpha += (1 * (delta.thisframe / this.duration));
       }
     }
-    this.setState({lastframe: Date.now()});
+    this.setState({alpha, lastframe: Date.now()});
   }
 
   fadeEnd() {
     if (this.state.direction < 0) {
-      this.sprite.alpha = 0;
+      this.setState({alpha: 0});
       this.props.RemoveCard(this.props.index);
     } else {
-      this.sprite.alpha = 1;
+      this.setState({alpha: 1});
     }
     this.setState({
       animating: false,
@@ -217,7 +183,23 @@ class Card extends Component {
   }
 
   render() {
-    return null;
+    return (
+      <Sprite
+        button={true}
+        interactive={(this.props.Interactive && !this.state.animating && !this.props.flipped)}
+        width={this.state.width}
+        height={this.state.height}
+        x={this.props.x}
+        y={this.props.y}
+        scaleX={this.state.scaleX}
+        scaleY={this.state.scaleY}
+        texture={this.state.texture}
+        addToStage={this.props.addToStage}
+        removeFromStage={this.props.removeFromStage}
+        alpha={this.state.alpha}
+        clickHandler={this.onClick}
+      />
+    );
   }
 }
 

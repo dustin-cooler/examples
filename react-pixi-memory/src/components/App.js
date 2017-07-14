@@ -7,8 +7,8 @@ import shuffle from 'lodash/shuffle';
 import filter from 'lodash/filter';
 import ConnectCanvas from './Canvas';
 import Loading from './Loading';
-import NewGame from './NewGame';
-import EndGame from './EndGame';
+import Menu from './Menu';
+import Button from './Button';
 import ConnectCard from './Card';
 
 const PIXI = window.PIXI;
@@ -176,8 +176,18 @@ class App extends Component {
     return (
       <div className={"App " + show}>
         {show === 'loading' ? <Loading /> : '' }
-        {show === 'new' ? <NewGame terms={this.terms} LoadImageList={this.props.LoadImageList} /> : ''}
-        {show === 'end' ? <EndGame Turns={this.props.Turns} ResetAll={this.props.ResetAll} /> : ''}
+        {show === 'new' ?
+          <Menu title="Start Game" className="new-game">
+            {this.terms.map((term) =>
+              <Button key={term.query} label={term.label} clickHandler={(e) => {e.preventDefault(); this.props.LoadImageList(term.query);}} />
+            )}
+          </Menu> : ''
+        }
+        {show === 'end' ?
+          <Menu title={"You Finished in " + Math.floor(this.props.Turns / 2) + " Turns"} className="end-game">
+            <Button label="Play Again" clickHandler={(e) => {e.preventDefault(); this.props.ResetAll();}} />
+          </Menu> : ''
+        }
         {show === 'canvas' ?
           <ConnectCanvas width={400} height={400} stageBackground={this.images.stageBackground}>
             {this.props.Cards.map((card, index) => (card.visible) ?

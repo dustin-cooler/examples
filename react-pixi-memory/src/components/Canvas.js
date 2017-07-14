@@ -4,6 +4,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as actionCreators from '../actions';
 import filter from 'lodash/filter';
+import Sprite from './Sprite';
 
 const PIXI = window.PIXI;
 
@@ -25,8 +26,6 @@ class Canvas extends Component {
     this.addToStage = this.addToStage.bind(this);
     this.removeFromStage = this.removeFromStage.bind(this);
     this.animate = this.animate.bind(this);
-
-    this.unaddedChildren = [];
   }
 
   componentDidMount() {
@@ -39,16 +38,6 @@ class Canvas extends Component {
     this.stage = new PIXI.Container();
     this.stage.width = this.props.width;
     this.stage.height = this.props.height;
-
-
-    const stageTexture = PIXI.Texture.fromImage(this.props.stageBackground)
-
-    this.background = new PIXI.Sprite(stageTexture);
-    this.background.anchor.x = 0.5;
-    this.background.anchor.y = 0.5;
-    this.background.position.x = this.props.width / 2;
-    this.background.position.y = this.props.height / 2;
-    this.stage.addChild(this.background);
 
     this.setState({ready: true});
 
@@ -76,7 +65,16 @@ class Canvas extends Component {
   render() {
     return (
       <div id="pixi-canvas" ref={(element) => this._canvas = element}>
-        {this.props.children.map((child) => (this.state.ready) ? React.cloneElement(child, { addToStage: this.addToStage, removeFromStage: this.removeFromStage }) : '')}
+        {this.state.ready ?
+          <Sprite
+            x={this.props.width / 2}
+            y={this.props.height / 2}
+            texture={PIXI.Texture.fromImage(this.props.stageBackground)}
+            addToStage={this.addToStage}
+            removeFromStage={this.removeFromStage}
+          /> : ''
+        }
+        {this.props.children.map((child) => (this.state.ready && child) ? React.cloneElement(child, { addToStage: this.addToStage, removeFromStage: this.removeFromStage }) : '')}
       </div>
     );
   }
